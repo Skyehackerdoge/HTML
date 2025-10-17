@@ -1,8 +1,6 @@
 <!DOCTYPE html>
 <html>
-<head>
-    <title>Student Details</title>
-</head>
+<head><title>Student Details</title></head>
 <body>
     <h2>Student Details</h2>
     <table border="2" id="student-details-table">
@@ -11,7 +9,7 @@
             <th>Course Id</th>
             <th>Marks</th>
         </tr>
-        {% for row in tables %}
+        {% for row in student_data %}
         <tr>
             <td>{{ row['Student ID'] }}</td>
             <td>{{ row['Course ID'] }}</td>
@@ -20,7 +18,7 @@
         {% endfor %}
         <tr>
             <td colspan="2" style="text-align:center">Total Marks</td>
-            <td>{{ total }}</td>
+            <td>{{ total_marks }}</td>
         </tr>
     </table>
     <br>
