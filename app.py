@@ -5,65 +5,55 @@ import os
 
 app = Flask(__name__)
 
-@app.route("/", methods=["GET", "POST"])
+@app.route('/', methods=['GET', 'POST'])
 def index():
-    if request.method == "POST":
-        id_type = request.form.get("ID")
-        id_value = request.form.get("id_value")
+    if request.method == 'POST':
+        id_type = request.form.get('ID')
+        id_value = request.form.get('id_value')
 
-        if not id_type or not id_value:
-            return render_template("error.html", message="Invalid input. Please try again.")
+        # Basic validation
+        if not id_type or not id_value or id_value.strip() == "":
+            return render_template('error.html', message="Invalid input. Please try again.")
 
         try:
-            df = pd.read_csv("data.csv")
+            df = pd.read_csv('data.csv')
         except Exception:
-            return render_template("error.html", message="Error reading data.csv file.")
+            return render_template('error.html', message="Invalid input. Please try again.")
 
-        # ✅ Handle student_id
-        if id_type == "student_id":
-            df_student = df[df["Student ID"].astype(str) == str(id_value)]
-            if df_student.empty:
-                return render_template("error.html", message="Student ID not found. Please try again.")
+        if id_type == 'student_id':
+            result = df[df['Student ID'] == id_value]
+            if result.empty:
+                return render_template('error.html', message="Invalid input. Please try again.")
 
-            total_marks = df_student["Marks"].sum()
-            return render_template(
-                "student.html",
-                student_data=df_student.to_dict(orient="records"),
-                total_marks=total_marks
-            )
+            total_marks = result['Marks'].sum()
+            records = result.to_dict(orient='records')
 
-        # ✅ Handle course_id
-        elif id_type == "course_id":
-            df_course = df[df["Course ID"].astype(str) == str(id_value)]
-            if df_course.empty:
-                return render_template("error.html", message="Course ID not found. Please try again.")
+            return render_template('student.html',
+                                   records=records,
+                                   total=total_marks)
 
-            avg_marks = round(df_course["Marks"].mean(), 2)
-            max_marks = df_course["Marks"].max()
+        elif id_type == 'course_id':
+            result = df[df['Course ID'] == id_value]
+            if result.empty:
+                return render_template('error.html', message="Invalid input. Please try again.")
 
-            # Create histogram
+            avg_marks = round(result['Marks'].mean(), 2)
+            max_marks = result['Marks'].max()
+
+            # Save histogram
+            if not os.path.exists('static'):
+                os.makedirs('static')
             plt.figure()
-            plt.hist(df_course["Marks"], bins=10, edgecolor="black")
-            plt.title(f"Histogram for Course {id_value}")
-            plt.xlabel("Marks")
-            plt.ylabel("Frequency")
-
-            os.makedirs("static", exist_ok=True)
-            plt.savefig("static/histogram.png")
+            plt.hist(result['Marks'], bins=10, edgecolor='black')
+            plt.title(f'Histogram for {id_value}')
+            plt.xlabel('Marks')
+            plt.ylabel('Frequency')
+            plt.savefig('static/histogram.png')
             plt.close()
 
-            return render_template(
-                "course.html",
-                average_marks=avg_marks,
-                maximum_marks=max_marks,
-                hist_file="histogram.png"
-            )
-
+            return render_template('course.html',
+                                   average=avg_marks,
+                                   maximum=max_marks,
+                                   hist='histogram.png')
         else:
-            return render_template("error.html", message="Invalid input. Please try again.")
-
-    return render_template("index.html")
-
-
-if __name__ == "__main__":
-    app.run()
+            retur
