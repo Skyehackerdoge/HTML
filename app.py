@@ -56,4 +56,9 @@ def index():
                                    maximum=max_marks,
                                    hist='histogram.png')
         else:
-            retur
+            return render_template('error.html', message="Invalid input. Please try again.")
+    else:
+        return render_template('index.html')
+
+if __name__ == "__main__":
+    app.run()
